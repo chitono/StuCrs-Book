@@ -1,6 +1,6 @@
 # CNNによるMNISTの学習
 
-ではいよいよ今まで実装してきたCNNの関数を用いてモデルを構築します。なお、Conv2dといったCNNの複雑な行列計算は純Rustで行うため、pythonのNumPyのように行列計算が最適化されておらず、前回の学習、[MNISTの学習](https://chitono.github.io/StuCrs/book-basic/Training/Mnist_training.html)に比べてCPUではとても時間がかかると予想されます。この場合、バッチ数を減らしたり、モデルの層を浅くしたりと少し調整してください。
+ではいよいよ今まで実装してきたCNNの関数を用いてモデルを構築します。なお、Conv2dといったCNNの複雑な行列計算は純Rustで行うため、pythonのNumPyのように行列計算が最適化されておらず、前回の学習、[MNISTの学習](https://chitono.github.io/StuCrs-Book/book-basic/Training/Mnist_training.html)に比べてCPUではとても時間がかかると予想されます。この場合、バッチ数を減らしたり、モデルの層を浅くしたりと少し調整してください。
 
 では学習コードを示します。
 
@@ -154,7 +154,7 @@ fn main() {
 }
 ```
 
-基本的な構成は基礎編で書いた[MNISTの学習](https://chitono.github.io/StuCrs/book-basic/Training/Mnist_training.html)と同じです。違う点はMNISTデータの四次元化とモデルの層です。
+基本的な構成は基礎編で書いた[MNISTの学習](https://chitono.github.io/StuCrs-Book/book-basic/Training/Mnist_training.html)と同じです。違う点はMNISTデータの四次元化とモデルの層です。
 
 - MNISTのデータ
  前のMNISTデータは画像を1次元にフラットにしたのでバッチを合わせて二次元でした。しかし、今回は画像を二次元として、さらにチャンネル数も考慮するため四次元\\((N,C,K,W)\\)に変換します。MNISTは白黒なので、チャンネル数は1です。
