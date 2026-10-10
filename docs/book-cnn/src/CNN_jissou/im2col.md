@@ -145,7 +145,7 @@ pub fn im2col_array(
 
 
 ## Im2col構造体
-行列の処理ができたとして、Function構造体を実装していきます。Function構造体を実装するにあたり、バックプロパゲーションを考えなくてはならないのですが、実はこの **Im2col構造体** は前回のドキュメントの[Broaccast_to関数](https://chitono.github.io/StuCrs/book-basic/matrix_extension/broadcast_taiou/broadcast_to.html)が**sum_to関数** とバックプロパゲーションで表裏一体の関係だったのと同じように、今回ももう一つ別の構造体を同時に作ります。それが **Col2im** です。
+行列の処理ができたとして、Function構造体を実装していきます。Function構造体を実装するにあたり、バックプロパゲーションを考えなくてはならないのですが、実はこの **Im2col構造体** は前回のドキュメントの[Broaccast_to関数](https://chitono.github.io/StuCrs-Book/book-basic/matrix_extension/broadcast_taiou/broadcast_to.html)が**sum_to関数** とバックプロパゲーションで表裏一体の関係だったのと同じように、今回ももう一つ別の構造体を同時に作ります。それが **Col2im** です。
 
 
 ```rust
