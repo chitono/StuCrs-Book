@@ -6,44 +6,71 @@
 Maxpool関数を実装する前に理論のところで説明した、最大値をとる関数、 **argmax関数** を実装します。この関数に関しては補足のTODO:argmaxで解説していますので、先にこちらで実装、理解しておいてください。
 
 ではここからMaxpool関数を実装していきます。
-TODO:コードは後で
 ```rust
+pub fn max_pool2d_simple(
+    input: &RcVariable,
+    kernel_size: (usize, usize),
+    stride_size: (usize, usize),
+    pad_size: (usize, usize),
+) {
+    let input_data = input.data();
+
+    let input_shape = input_data.shape().dims();
+
+    let n = input_shape[0];
+    let c = input_shape[1];
+    let h = input_shape[2];
+    let w = input_shape[3];
+
+    let (kh, kw) = kernel_size;
+
+    let (oh, ow) = get_conv_outsize((h, w), kernel_size, stride_size, pad_size);
+
+    let cols = im2col_simple(input, kernel_size, stride_size, pad_size);
+
+    let cols = cols.reshape(&Shape::new(vec![n, kh * kw, c * oh * ow]));
+
+    let y = max(&cols, Some(1));
+
+    let output = y
+        .reshape(&Shape::new(vec![n, oh, ow, c]))
+        .permute_axes(vec![0, 3, 1, 2]);
+
+    output
+}
 ```
 
 計算の流れは理論のところで説明した通りです。argmax関数の引数に注意すれば理論通りの処理をしてくれるはずです。
 
 ではテストを行います。
-// TODO:テストコード後で載せる
 ```rust
 #[test]
-    fn col2im_function_test() {
-        use crate::core_new::ArrayDToRcVariable;
+    fn max_pool2d_test() {
+        use crate::core::TensorToRcVariable;
 
-        // im2col_testの出力。(output)
-        let input = array![[
-            [1.0, 2.0, 3.0, 5.0, 6.0, 7.0, 9.0, 10.0, 11.0],
-            [2.0, 3.0, 4.0, 6.0, 7.0, 8.0, 10.0, 11.0, 12.0],
-            [5.0, 6.0, 7.0, 9.0, 10.0, 11.0, 13.0, 14.0, 15.0],
-            [6.0, 7.0, 8.0, 10.0, 11.0, 12.0, 14.0, 15.0, 16.0]
-        ]]
-        .rv();
+        let input_tensor = Tensor::from_vec(
+            vec![
+                4.0f32, 1.0, 5.0, 3.0, 7.0, 3.0, 2.0, 3.0, 7.0, 2.0, 3.0, 4.0, 1.0, 5.0, 3.0, 9.0,
+                4.0, 1.0, 5.0, 3.0, 7.0, 3.0, 2.0, 3.0, 7.0, 2.0, 3.0, 4.0, 1.0, 5.0, 3.0, 9.0,
+            ],
+            vec![2, 1, 4, 4],
+        );
 
+        println!("input_shape = {:?}", input_tensor.shape());
+
+        let input = input_tensor.rv();
         let kernel_size = (2, 2);
-        let stride_size = (1, 1);
+        let stride_size = (2, 2);
         let pad_size = (0, 0);
 
-        let input_shape = [1, 1, 4, 4];
+        let mut output = max_pool2d_simple(&input, kernel_size, stride_size, pad_size);
 
-        let mut output = col2im_simple(&input, input_shape, kernel_size, stride_size, pad_size);
-
-        println!("output = {:?}", output);
-        /*output = [[[[1.0, 4.0, 6.0, 4.0],
-        [10.0, 24.0, 28.0, 16.0],
-        [18.0, 40.0, 44.0, 24.0],
-        [13.0, 28.0, 30.0, 16.0]]]] */
+        println!("output = {}", output.data()); //shape = (1,2,3,3)
 
         output.backward(false);
-        println!("input_grad = {:?}", input.grad().unwrap().data());
+
+        println!("input_grad= {}", input.grad().unwrap().data()); //shape = (1,5,15,15)
+
     }
 ```
 

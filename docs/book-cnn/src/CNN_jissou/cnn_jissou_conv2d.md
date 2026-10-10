@@ -13,7 +13,7 @@ pub fn conv2d_simple(
     bias: Option<RcVariable>,
     stride_size: (usize, usize),
     pad_size: (usize, usize),
-) -> FrameResult<RcVariable> {
+) -> RcVariable {
     let input_data = input.data();
     let weight_data = weight.data();
 
@@ -38,19 +38,19 @@ pub fn conv2d_simple(
 
     let (oh, ow) = get_conv_outsize((h, w), (kh, kw), stride_size, pad_size);
 
-    let cols = im2col_simple(input, (kh, kw), stride_size, pad_size)?;
+    let cols = im2col_simple(input, (kh, kw), stride_size, pad_size);
 
-    let weights_2d = weight.reshape(&Shape::new(vec![oc, c * kh * kw])?)?;
+    let weights_2d = weight.reshape(&Shape::new(vec![oc, c * kh * kw]));
 
-    let out = tensordot(&weights_2d, &cols)?;
+    let out = tensordot(&weights_2d, &cols);
 
-    let mut out4d = out.reshape(&Shape::new(vec![n, oc, oh, ow])?)?;
+    let mut out4d = out.reshape(&Shape::new(vec![n, oc, oh, ow]));
 
     if let Some(b) = bias {
         out4d = out4d + b;
     }
 
-    Ok(out4d)
+    out4d
 }
 ```
 
@@ -60,37 +60,32 @@ Conv2dの処理をかなりシンプルに関数としてまとめることが�
 
 
 では計算処理が正しいかテストします。特にバックプロパゲーションがうまく働くか確認します。
-// TODO:テストコード後で載せる
 ```rust
 #[test]
-    fn col2im_function_test() {
-        use crate::core_new::ArrayDToRcVariable;
+    fn conv2d_test()  {
+        use crate::core::TensorToRcVariable;
 
-        // im2col_testの出力。(output)
-        let input = array![[
-            [1.0, 2.0, 3.0, 5.0, 6.0, 7.0, 9.0, 10.0, 11.0],
-            [2.0, 3.0, 4.0, 6.0, 7.0, 8.0, 10.0, 11.0, 12.0],
-            [5.0, 6.0, 7.0, 9.0, 10.0, 11.0, 13.0, 14.0, 15.0],
-            [6.0, 7.0, 8.0, 10.0, 11.0, 12.0, 14.0, 15.0, 16.0]
-        ]]
-        .rv();
+        let input_tensor = Tensor::ones(vec![2, 5, 15, 15]);
+        let weight_tensor = Tensor::ones(vec![8, 5, 3, 3]);
 
-        let kernel_size = (2, 2);
+        let input = input_tensor.rv();
+        let weight = weight_tensor.rv();
+
         let stride_size = (1, 1);
         let pad_size = (0, 0);
 
-        let input_shape = [1, 1, 4, 4];
+        let mut output = conv2d_simple(&input, &weight, None, stride_size, pad_size);
 
-        let mut output = col2im_simple(&input, input_shape, kernel_size, stride_size, pad_size);
-
-        println!("output = {:?}", output);
-        /*output = [[[[1.0, 4.0, 6.0, 4.0],
-        [10.0, 24.0, 28.0, 16.0],
-        [18.0, 40.0, 44.0, 24.0],
-        [13.0, 28.0, 30.0, 16.0]]]] */
+        println!("output_shape = {:?}", output.data().shape()); //shape = (1,8,15,15)
 
         output.backward(false);
-        println!("input_grad = {:?}", input.grad().unwrap().data());
+
+        println!(
+            "input_grad_shape = {:?}",
+            input.grad().unwrap().data().to_vec()
+        ); //shape = (1,5,15,15)
+
+        
     }
 ```
 
