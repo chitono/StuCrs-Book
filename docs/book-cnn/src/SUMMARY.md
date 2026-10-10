@@ -14,6 +14,6 @@
   - [maxpoolレイヤーの実装](./CNN_jissou/maxpool_fn.md)
 - [CNNによる学習]()
   - [MNISTの学習](./CNN_training/MNIST_CNN.md)
-- [最後に]()
+- [終わりに](./ending.md)
 - [補足]()
   - [Permuted_Axes関数]()
